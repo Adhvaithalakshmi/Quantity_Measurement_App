@@ -1,14 +1,45 @@
 public class QuantityMeasurementApp {
 
-    // Feet class
-    static class Feet {
+    // Enum for units
+    enum LengthUnit {
 
-        private final double value;
+        FEET(1.0),
+        INCH(1.0 / 12.0);
 
-        public Feet(double value) {
-            this.value = value;
+        private final double conversionFactor;
+
+        LengthUnit(double conversionFactor) {
+            this.conversionFactor = conversionFactor;
         }
 
+        public double getConversionFactor() {
+            return conversionFactor;
+        }
+    }
+
+    // Generic Quantity Length class
+    static class QuantityLength {
+
+        private final double value;
+        private final LengthUnit unit;
+
+        // Constructor
+        public QuantityLength(double value, LengthUnit unit) {
+
+            if (unit == null) {
+                throw new IllegalArgumentException("Unit cannot be null");
+            }
+
+            this.value = value;
+            this.unit = unit;
+        }
+
+        // Convert to base unit (feet)
+        private double toFeet() {
+            return value * unit.getConversionFactor();
+        }
+
+        // Override equals method
         @Override
         public boolean equals(Object obj) {
 
@@ -23,75 +54,45 @@ public class QuantityMeasurementApp {
             }
 
             // Type casting
-            Feet feet = (Feet) obj;
+            QuantityLength other = (QuantityLength) obj;
 
-            // Compare values
-            return Double.compare(feet.value, value) == 0;
-        }
-    }
-
-    // Inches class
-    static class Inches {
-
-        private final double value;
-
-        public Inches(double value) {
-            this.value = value;
+            // Compare converted values
+            return Double.compare(this.toFeet(),
+                    other.toFeet()) == 0;
         }
 
         @Override
-        public boolean equals(Object obj) {
-
-            // Same reference
-            if (this == obj) {
-                return true;
-            }
-
-            // Null or different class
-            if (obj == null || getClass() != obj.getClass()) {
-                return false;
-            }
-
-            // Type casting
-            Inches inches = (Inches) obj;
-
-            // Compare values
-            return Double.compare(inches.value, value) == 0;
+        public String toString() {
+            return "Quantity(" + value + ", " + unit + ")";
         }
-    }
-
-    // Method for Feet equality
-    public static boolean checkFeetEquality(double value1, double value2) {
-
-        Feet feet1 = new Feet(value1);
-        Feet feet2 = new Feet(value2);
-
-        return feet1.equals(feet2);
-    }
-
-    // Method for Inches equality
-    public static boolean checkInchesEquality(double value1, double value2) {
-
-        Inches inch1 = new Inches(value1);
-        Inches inch2 = new Inches(value2);
-
-        return inch1.equals(inch2);
     }
 
     // Main method
     public static void main(String[] args) {
 
-        // Feet comparison
-        boolean feetResult = checkFeetEquality(1.0, 1.0);
+        // Feet to inches comparison
+        QuantityLength q1 =
+                new QuantityLength(1.0, LengthUnit.FEET);
 
-        // Inches comparison
-        boolean inchResult = checkInchesEquality(1.0, 1.0);
+        QuantityLength q2 =
+                new QuantityLength(12.0, LengthUnit.INCH);
 
-        // Output
-        System.out.println("Input: 1.0 inch and 1.0 inch");
-        System.out.println("Output: Equal (" + inchResult + ")");
+        // Inch to inch comparison
+        QuantityLength q3 =
+                new QuantityLength(1.0, LengthUnit.INCH);
 
-        System.out.println("Input: 1.0 ft and 1.0 ft");
-        System.out.println("Output: Equal (" + feetResult + ")");
+        QuantityLength q4 =
+                new QuantityLength(1.0, LengthUnit.INCH);
+
+        // Results
+        System.out.println("Input: " + q1 + " and " + q2);
+        System.out.println("Output: Equal (" +
+                q1.equals(q2) + ")");
+
+        System.out.println();
+
+        System.out.println("Input: " + q3 + " and " + q4);
+        System.out.println("Output: Equal (" +
+                q3.equals(q4) + ")");
     }
 }
