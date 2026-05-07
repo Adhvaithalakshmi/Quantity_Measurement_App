@@ -1,94 +1,109 @@
+import java.util.Objects;
+import java.util.function.DoubleBinaryOperator;
+
+/* =========================
+   INTERFACE
+   ========================= */
 interface IMeasurable {
-
-    double getConversionFactor();
-
-    default double convertToBaseUnit(double value) {
-        return value * getConversionFactor();
-    }
-
-    default double convertFromBaseUnit(double baseValue) {
-        return baseValue / getConversionFactor();
-    }
-
-    String getUnitName();
+    double convertToBaseUnit(double value);
+    double convertFromBaseUnit(double baseValue);
 }
 
-// ---------------- LENGTH ----------------
+/* =========================
+   LENGTH UNIT
+   Base Unit = FEET
+   ========================= */
 enum LengthUnit implements IMeasurable {
 
     FEET(1.0),
     INCHES(1.0 / 12.0);
 
-    private final double factor;
+    private final double toBaseFactor;
 
-    LengthUnit(double factor) {
-        this.factor = factor;
+    LengthUnit(double toBaseFactor) {
+        this.toBaseFactor = toBaseFactor;
     }
 
-    public double getConversionFactor() {
-        return factor;
+    @Override
+    public double convertToBaseUnit(double value) {
+        return value * toBaseFactor;
     }
 
-    public String getUnitName() {
-        return name();
+    @Override
+    public double convertFromBaseUnit(double baseValue) {
+        return baseValue / toBaseFactor;
     }
 }
 
-// ---------------- WEIGHT ----------------
+/* =========================
+   WEIGHT UNIT
+   Base Unit = KILOGRAM
+   ========================= */
 enum WeightUnit implements IMeasurable {
 
     KILOGRAM(1.0),
     GRAM(0.001);
 
-    private final double factor;
+    private final double toBaseFactor;
 
-    WeightUnit(double factor) {
-        this.factor = factor;
+    WeightUnit(double toBaseFactor) {
+        this.toBaseFactor = toBaseFactor;
     }
 
-    public double getConversionFactor() {
-        return factor;
+    @Override
+    public double convertToBaseUnit(double value) {
+        return value * toBaseFactor;
     }
 
-    public String getUnitName() {
-        return name();
+    @Override
+    public double convertFromBaseUnit(double baseValue) {
+        return baseValue / toBaseFactor;
     }
 }
 
-// ---------------- VOLUME ----------------
+/* =========================
+   VOLUME UNIT
+   Base Unit = LITRE
+   ========================= */
 enum VolumeUnit implements IMeasurable {
 
     LITRE(1.0),
-    MILLILITRE(0.001),
-    GALLON(3.78541);
+    MILLILITRE(0.001);
 
-    private final double factor;
+    private final double toBaseFactor;
 
-    VolumeUnit(double factor) {
-        this.factor = factor;
+    VolumeUnit(double toBaseFactor) {
+        this.toBaseFactor = toBaseFactor;
     }
 
-    public double getConversionFactor() {
-        return factor;
+    @Override
+    public double convertToBaseUnit(double value) {
+        return value * toBaseFactor;
     }
 
-    public String getUnitName() {
-        return name();
+    @Override
+    public double convertFromBaseUnit(double baseValue) {
+        return baseValue / toBaseFactor;
     }
 }
 
-// ---------------- QUANTITY ----------------
+/* =========================
+   QUANTITY CLASS
+   ========================= */
 class Quantity<U extends IMeasurable> {
 
     private final double value;
     private final U unit;
 
-    private static final double EPSILON = 0.0001;
-
     public Quantity(double value, U unit) {
 
-        if (unit == null)
+        if (unit == null) {
             throw new IllegalArgumentException("Unit cannot be null");
+        }
+
+        if (!Double.isFinite(value)) {
+            throw new IllegalArgumentException("Value must be finite");
+        }
 
         this.value = value;
         this.unit = unit;
@@ -102,123 +117,259 @@ class Quantity<U extends IMeasurable> {
         return unit;
     }
 
-    // EQUALITY
-    @Override
-    public boolean equals(Object obj) {
+    /* =========================
+       ARITHMETIC OPERATION ENUM
+       ========================= */
+    private enum ArithmeticOperation {
 
-        if (this == obj)
-            return true;
+        ADD((a, b) -> a + b),
 
-        if (!(obj instanceof Quantity<?>))
-            return false;
+        SUBTRACT((a, b) -> a - b),
 
-        Quantity<?> other = (Quantity<?>) obj;
+        DIVIDE((a, b) -> {
+            if (b == 0) {
+                throw new ArithmeticException("Division by zero");
+            }
+            return a / b;
+        });
 
-        if (!unit.getClass().equals(other.unit.getClass()))
-            return false;
+        private final DoubleBinaryOperator operator;
 
-        double thisBase = unit.convertToBaseUnit(value);
-        double otherBase = other.unit.convertToBaseUnit(other.value);
+        ArithmeticOperation(DoubleBinaryOperator operator) {
+            this.operator = operator;
+        }
 
-        return Math.abs(thisBase - otherBase) < EPSILON;
+        public double compute(double a, double b) {
+            return operator.applyAsDouble(a, b);
+        }
     }
 
-    // CONVERSION
-    public Quantity<U> convertTo(U targetUnit) {
+    /* =========================
+       VALIDATION HELPER
+       ========================= */
+    private void validateArithmeticOperands(
+            Quantity<U> other,
+            U targetUnit,
+            boolean targetRequired) {
 
-        double base = unit.convertToBaseUnit(value);
-        double converted = targetUnit.convertFromBaseUnit(base);
+        if (other == null) {
+            throw new IllegalArgumentException("Other quantity cannot be null");
+        }
 
-        return new Quantity<>(round(converted), targetUnit);
+        if (other.unit == null) {
+            throw new IllegalArgumentException("Other quantity unit cannot be null");
+        }
+
+        if (!unit.getClass().equals(other.unit.getClass())) {
+            throw new IllegalArgumentException(
+                    "Cross-category arithmetic not allowed");
+        }
+
+        if (!Double.isFinite(value) || !Double.isFinite(other.value)) {
+            throw new IllegalArgumentException(
+                    "Values must be finite");
+        }
+
+        if (targetRequired && targetUnit == null) {
+            throw new IllegalArgumentException(
+                    "Target unit cannot be null");
+        }
     }
 
-    // ADDITION
+    /* =========================
+       CENTRALIZED ARITHMETIC
+       ========================= */
+    private double performBaseArithmetic(
+            Quantity<U> other,
+            ArithmeticOperation operation) {
+
+        double thisBase =
+                unit.convertToBaseUnit(this.value);
+
+        double otherBase =
+                other.unit.convertToBaseUnit(other.value);
+
+        return operation.compute(thisBase, otherBase);
+    }
+
+    /* =========================
+       ROUNDING
+       ========================= */
+    private double roundToTwoDecimals(double number) {
+        return Math.round(number * 100.0) / 100.0;
+    }
+
+    /* =========================
+       ADD METHODS
+       ========================= */
     public Quantity<U> add(Quantity<U> other) {
-        return add(other, unit);
+        return add(other, this.unit);
     }
 
     public Quantity<U> add(Quantity<U> other, U targetUnit) {
 
-        double resultBase =
-                unit.convertToBaseUnit(value)
-                        + other.unit.convertToBaseUnit(other.value);
+        validateArithmeticOperands(other, targetUnit, true);
 
-        double result = targetUnit.convertFromBaseUnit(resultBase);
+        double baseResult =
+                performBaseArithmetic(other,
+                        ArithmeticOperation.ADD);
 
-        return new Quantity<>(round(result), targetUnit);
+        double converted =
+                targetUnit.convertFromBaseUnit(baseResult);
+
+        return new Quantity<>(
+                roundToTwoDecimals(converted),
+                targetUnit);
     }
 
-    // SUBTRACTION
+    /* =========================
+       SUBTRACT METHODS
+       ========================= */
     public Quantity<U> subtract(Quantity<U> other) {
-        return subtract(other, unit);
+        return subtract(other, this.unit);
     }
 
-    public Quantity<U> subtract(Quantity<U> other, U targetUnit) {
+    public Quantity<U> subtract(Quantity<U> other,
+                                U targetUnit) {
 
-        double resultBase =
-                unit.convertToBaseUnit(value)
-                        - other.unit.convertToBaseUnit(other.value);
+        validateArithmeticOperands(other, targetUnit, true);
 
-        double result = targetUnit.convertFromBaseUnit(resultBase);
+        double baseResult =
+                performBaseArithmetic(other,
+                        ArithmeticOperation.SUBTRACT);
 
-        return new Quantity<>(round(result), targetUnit);
+        double converted =
+                targetUnit.convertFromBaseUnit(baseResult);
+
+        return new Quantity<>(
+                roundToTwoDecimals(converted),
+                targetUnit);
     }
 
-    // DIVISION
+    /* =========================
+       DIVIDE METHOD
+       ========================= */
     public double divide(Quantity<U> other) {
 
-        double divisor =
-                other.unit.convertToBaseUnit(other.value);
+        validateArithmeticOperands(other, null, false);
 
-        if (divisor == 0)
-            throw new ArithmeticException("Division by zero");
-
-        double dividend =
-                unit.convertToBaseUnit(value);
-
-        return dividend / divisor;
+        return performBaseArithmetic(
+                other,
+                ArithmeticOperation.DIVIDE);
     }
 
-    private double round(double value) {
-        return Math.round(value * 100.0) / 100.0;
+    /* =========================
+       EQUALS
+       ========================= */
+    @Override
+    public boolean equals(Object obj) {
+
+        if (this == obj) {
+            return true;
+        }
+
+        if (!(obj instanceof Quantity<?> other)) {
+            return false;
+        }
+
+        double thisBase =
+                unit.convertToBaseUnit(this.value);
+
+        double otherBase =
+                other.unit.convertToBaseUnit(other.value);
+
+        return Math.abs(thisBase - otherBase) < 0.01;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(
+                roundToTwoDecimals(
+                        unit.convertToBaseUnit(value)));
     }
 
     @Override
     public String toString() {
-        return "Quantity(" + value + ", " + unit.getUnitName() + ")";
+        return "Quantity(" + value + ", " + unit + ")";
     }
 }
 
-// ---------------- MAIN APP ----------------
+/* =========================
+   MAIN APPLICATION
+   ========================= */
 public class QuantityMeasurementApp {
 
     public static void main(String[] args) {
 
-        Quantity<VolumeUnit> litre =
-                new Quantity<>(1.0, VolumeUnit.LITRE);
+        System.out.println("===== ADDITION =====");
 
-        Quantity<VolumeUnit> ml =
-                new Quantity<>(1000.0, VolumeUnit.MILLILITRE);
+        Quantity<LengthUnit> addLength =
+                new Quantity<>(1.0, LengthUnit.FEET)
+                        .add(new Quantity<>(12.0,
+                                LengthUnit.INCHES));
 
-        Quantity<LengthUnit> feet =
-                new Quantity<>(10.0, LengthUnit.FEET);
-
-        Quantity<LengthUnit> inches =
-                new Quantity<>(6.0, LengthUnit.INCHES);
-
-        System.out.println("===== EQUALITY =====");
-        System.out.println(litre.equals(ml));
-
-        System.out.println("\n===== CONVERSION =====");
-        System.out.println(litre.convertTo(VolumeUnit.MILLILITRE));
-
-        System.out.println("\n===== ADDITION =====");
-        System.out.println(litre.add(ml));
+        System.out.println(addLength);
 
         System.out.println("\n===== SUBTRACTION =====");
-        System.out.println(feet.subtract(inches));
+
+        Quantity<LengthUnit> subtractLength =
+                new Quantity<>(10.0, LengthUnit.FEET)
+                        .subtract(new Quantity<>(6.0,
+                                LengthUnit.INCHES));
+
+        System.out.println(subtractLength);
+
+        Quantity<WeightUnit> subtractWeight =
+                new Quantity<>(10.0,
+                        WeightUnit.KILOGRAM)
+                        .subtract(new Quantity<>(5000.0,
+                                WeightUnit.GRAM));
+
+        System.out.println(subtractWeight);
+
+        Quantity<VolumeUnit> subtractVolume =
+                new Quantity<>(5.0,
+                        VolumeUnit.LITRE)
+                        .subtract(new Quantity<>(2.0,
+                                        VolumeUnit.LITRE),
+                                VolumeUnit.MILLILITRE);
+
+        System.out.println(subtractVolume);
 
         System.out.println("\n===== DIVISION =====");
-        System.out.println(feet.divide(new Quantity<>(2.0, LengthUnit.FEET)));
+
+        double ratio1 =
+                new Quantity<>(10.0, LengthUnit.FEET)
+                        .divide(new Quantity<>(2.0,
+                                LengthUnit.FEET));
+
+        System.out.println("10 FEET / 2 FEET = " + ratio1);
+
+        double ratio2 =
+                new Quantity<>(24.0,
+                        LengthUnit.INCHES)
+                        .divide(new Quantity<>(2.0,
+                                LengthUnit.FEET));
+
+        System.out.println("24 INCHES / 2 FEET = " + ratio2);
+
+        double ratio3 =
+                new Quantity<>(2000.0,
+                        WeightUnit.GRAM)
+                        .divide(new Quantity<>(1.0,
+                                WeightUnit.KILOGRAM));
+
+        System.out.println("2000 GRAM / 1 KG = " + ratio3);
+
+        System.out.println("\n===== CHAIN OPERATIONS =====");
+
+        Quantity<LengthUnit> chain =
+                new Quantity<>(10.0, LengthUnit.FEET)
+                        .add(new Quantity<>(2.0,
+                                LengthUnit.FEET))
+                        .subtract(new Quantity<>(1.0,
+                                LengthUnit.FEET));
+
+        System.out.println(chain);
     }
 }

@@ -1,51 +1,101 @@
+// QuantityTest.java
+// Plain Java test cases without JUnit
+
 public class QuantityMeasurementAppTest {
+
+    private static int passed = 0;
+    private static int failed = 0;
 
     public static void main(String[] args) {
 
-        // =====================================================
-        // EQUALITY TESTS
-        // =====================================================
+        testAddition();
+        testSubtraction();
+        testDivision();
+        testCrossUnitOperations();
+        testNegativeValues();
+        testZeroResult();
+        testDivisionByZero();
+        testNullOperand();
+        testCrossCategory();
+        testImmutability();
 
-        Quantity<VolumeUnit> litre =
-                new Quantity<>(1.0, VolumeUnit.LITRE);
+        System.out.println("\n==============================");
+        System.out.println("Tests Passed : " + passed);
+        System.out.println("Tests Failed : " + failed);
+        System.out.println("==============================");
+    }
 
-        Quantity<VolumeUnit> ml =
-                new Quantity<>(1000.0, VolumeUnit.MILLILITRE);
+    // ---------------- ASSERT METHODS ----------------
 
-        System.out.println("Litre == Millilitre : "
-                + litre.equals(ml));
+    private static void assertEquals(double expected, double actual, double epsilon, String testName) {
 
-        // =====================================================
-        // CONVERSION TESTS
-        // =====================================================
+        if (Math.abs(expected - actual) <= epsilon) {
+            System.out.println("PASS : " + testName);
+            passed++;
+        } else {
+            System.out.println("FAIL : " + testName);
+            System.out.println("Expected : " + expected);
+            System.out.println("Actual   : " + actual);
+            failed++;
+        }
+    }
 
-        System.out.println("\nConvert Litre to Millilitre");
-        System.out.println(
-                litre.convertTo(VolumeUnit.MILLILITRE));
+    private static void assertTrue(boolean condition, String testName) {
 
-        System.out.println("\nConvert Gallon to Litre");
+        if (condition) {
+            System.out.println("PASS : " + testName);
+            passed++;
+        } else {
+            System.out.println("FAIL : " + testName);
+            failed++;
+        }
+    }
 
-        Quantity<VolumeUnit> gallon =
-                new Quantity<>(1.0, VolumeUnit.GALLON);
+    // ---------------- TEST CASES ----------------
 
-        System.out.println(
-                gallon.convertTo(VolumeUnit.LITRE));
+    private static void testAddition() {
 
-        // =====================================================
-        // ADDITION TESTS
-        // =====================================================
+        Quantity<LengthUnit> q1 =
+                new Quantity<>(10.0, LengthUnit.FEET);
 
-        System.out.println("\nAddition");
+        Quantity<LengthUnit> q2 =
+                new Quantity<>(2.0, LengthUnit.FEET);
 
-        System.out.println(
-                litre.add(ml));
+        Quantity<LengthUnit> result = q1.add(q2);
 
-        System.out.println(
-                litre.add(ml, VolumeUnit.MILLILITRE));
+        assertEquals(12.0, result.getValue(), 0.01,
+                "Addition Same Unit");
+    }
 
-        // =====================================================
-        // SUBTRACTION TESTS
-        // =====================================================
+    private static void testSubtraction() {
+
+        Quantity<LengthUnit> q1 =
+                new Quantity<>(10.0, LengthUnit.FEET);
+
+        Quantity<LengthUnit> q2 =
+                new Quantity<>(5.0, LengthUnit.FEET);
+
+        Quantity<LengthUnit> result = q1.subtract(q2);
+
+        assertEquals(5.0, result.getValue(), 0.01,
+                "Subtraction Same Unit");
+    }
+
+    private static void testDivision() {
+
+        Quantity<LengthUnit> q1 =
+                new Quantity<>(10.0, LengthUnit.FEET);
+
+        Quantity<LengthUnit> q2 =
+                new Quantity<>(2.0, LengthUnit.FEET);
+
+        double result = q1.divide(q2);
+
+        assertEquals(5.0, result, 0.01,
+                "Division Same Unit");
+    }
+
+    private static void testCrossUnitOperations() {
 
         Quantity<LengthUnit> feet =
                 new Quantity<>(10.0, LengthUnit.FEET);
@@ -53,128 +103,119 @@ public class QuantityMeasurementAppTest {
         Quantity<LengthUnit> inches =
                 new Quantity<>(6.0, LengthUnit.INCHES);
 
-        System.out.println("\nSubtraction");
+        Quantity<LengthUnit> result =
+                feet.subtract(inches);
 
-        System.out.println(
-                feet.subtract(inches));
+        assertEquals(9.5, result.getValue(), 0.01,
+                "Cross Unit Subtraction");
+    }
 
-        System.out.println(
-                feet.subtract(inches, LengthUnit.INCHES));
+    private static void testNegativeValues() {
 
-        // =====================================================
-        // NEGATIVE RESULT
-        // =====================================================
+        Quantity<LengthUnit> q1 =
+                new Quantity<>(5.0, LengthUnit.FEET);
 
-        Quantity<VolumeUnit> v1 =
-                new Quantity<>(2.0, VolumeUnit.LITRE);
-
-        Quantity<VolumeUnit> v2 =
-                new Quantity<>(5.0, VolumeUnit.LITRE);
-
-        System.out.println("\nNegative Result");
-        System.out.println(v1.subtract(v2));
-
-        // =====================================================
-        // ZERO RESULT
-        // =====================================================
-
-        Quantity<LengthUnit> f1 =
+        Quantity<LengthUnit> q2 =
                 new Quantity<>(10.0, LengthUnit.FEET);
 
-        Quantity<LengthUnit> i1 =
+        Quantity<LengthUnit> result = q1.subtract(q2);
+
+        assertEquals(-5.0, result.getValue(), 0.01,
+                "Negative Result Subtraction");
+    }
+
+    private static void testZeroResult() {
+
+        Quantity<LengthUnit> q1 =
+                new Quantity<>(10.0, LengthUnit.FEET);
+
+        Quantity<LengthUnit> q2 =
                 new Quantity<>(120.0, LengthUnit.INCHES);
 
-        System.out.println("\nZero Result");
-        System.out.println(f1.subtract(i1));
+        Quantity<LengthUnit> result = q1.subtract(q2);
 
-        // =====================================================
-        // DIVISION TESTS
-        // =====================================================
+        assertEquals(0.0, result.getValue(), 0.01,
+                "Zero Result Subtraction");
+    }
 
-        System.out.println("\nDivision");
-
-        Quantity<WeightUnit> kg1 =
-                new Quantity<>(10.0, WeightUnit.KILOGRAM);
-
-        Quantity<WeightUnit> kg2 =
-                new Quantity<>(5.0, WeightUnit.KILOGRAM);
-
-        System.out.println(kg1.divide(kg2));
-
-        // =====================================================
-        // DIVISION CROSS UNIT
-        // =====================================================
-
-        Quantity<LengthUnit> i2 =
-                new Quantity<>(24.0, LengthUnit.INCHES);
-
-        Quantity<LengthUnit> f2 =
-                new Quantity<>(2.0, LengthUnit.FEET);
-
-        System.out.println("\nCross Unit Division");
-
-        System.out.println(i2.divide(f2));
-
-        // =====================================================
-        // LARGE VALUE TEST
-        // =====================================================
-
-        Quantity<WeightUnit> big1 =
-                new Quantity<>(1e6, WeightUnit.KILOGRAM);
-
-        Quantity<WeightUnit> big2 =
-                new Quantity<>(5e5, WeightUnit.KILOGRAM);
-
-        System.out.println("\nLarge Value Test");
-
-        System.out.println(big1.subtract(big2));
-
-        // =====================================================
-        // SMALL VALUE TEST
-        // =====================================================
-
-        Quantity<LengthUnit> small1 =
-                new Quantity<>(0.001, LengthUnit.FEET);
-
-        Quantity<LengthUnit> small2 =
-                new Quantity<>(0.0005, LengthUnit.FEET);
-
-        System.out.println("\nSmall Value Test");
-
-        System.out.println(small1.subtract(small2));
-
-        // =====================================================
-        // CHAINED OPERATIONS
-        // =====================================================
-
-        System.out.println("\nChained Operations");
-
-        Quantity<LengthUnit> result =
-                new Quantity<>(10.0, LengthUnit.FEET)
-                        .subtract(new Quantity<>(2.0, LengthUnit.FEET))
-                        .subtract(new Quantity<>(1.0, LengthUnit.FEET));
-
-        System.out.println(result);
-
-        // =====================================================
-        // DIVISION BY ZERO
-        // =====================================================
+    private static void testDivisionByZero() {
 
         try {
 
-            System.out.println("\nDivision By Zero");
+            Quantity<LengthUnit> q1 =
+                    new Quantity<>(10.0, LengthUnit.FEET);
 
-            System.out.println(
-                    feet.divide(
-                            new Quantity<>(0.0, LengthUnit.FEET)
-                    )
-            );
+            Quantity<LengthUnit> q2 =
+                    new Quantity<>(0.0, LengthUnit.FEET);
 
-        } catch (Exception e) {
+            q1.divide(q2);
 
-            System.out.println(e.getMessage());
+            System.out.println("FAIL : Division By Zero");
+            failed++;
+
+        } catch (ArithmeticException e) {
+
+            System.out.println("PASS : Division By Zero");
+            passed++;
         }
+    }
 
-        System.out.println("\nALL TEST CASES EXECUTED SUCCESSFULLY");
+    private static void testNullOperand() {
+
+        try {
+
+            Quantity<LengthUnit> q1 =
+                    new Quantity<>(10.0, LengthUnit.FEET);
+
+            q1.subtract(null);
+
+            System.out.println("FAIL : Null Operand");
+            failed++;
+
+        } catch (IllegalArgumentException e) {
+
+            System.out.println("PASS : Null Operand");
+            passed++;
+        }
+    }
+
+    private static void testCrossCategory() {
+
+        try {
+
+            Quantity rawLength =
+                    new Quantity<>(10.0, LengthUnit.FEET);
+
+            Quantity rawWeight =
+                    new Quantity<>(5.0, WeightUnit.KILOGRAM);
+
+            rawLength.subtract(rawWeight);
+
+            System.out.println("FAIL : Cross Category");
+            failed++;
+
+        } catch (IllegalArgumentException e) {
+
+            System.out.println("PASS : Cross Category");
+            passed++;
+        }
+    }
+
+    private static void testImmutability() {
+
+        Quantity<LengthUnit> original =
+                new Quantity<>(10.0, LengthUnit.FEET);
+
+        Quantity<LengthUnit> other =
+                new Quantity<>(5.0, LengthUnit.FEET);
+
+        Quantity<LengthUnit> result =
+                original.subtract(other);
+
+        boolean unchanged =
+                original.getValue() == 10.0;
+
+        assertTrue(unchanged,
+                "Immutability Test");
     }
 }
