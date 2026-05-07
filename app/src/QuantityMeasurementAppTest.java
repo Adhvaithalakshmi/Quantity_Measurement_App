@@ -2,125 +2,170 @@ public class QuantityMeasurementAppTest {
 
     public static void main(String[] args) {
 
-        // Yard to yard same value
-        QuantityMeasurementApp.QuantityLength y1 =
-                new QuantityMeasurementApp.QuantityLength(
-                        1.0,
-                        QuantityMeasurementApp.LengthUnit.YARDS);
+        double epsilon = 1e-6;
 
-        QuantityMeasurementApp.QuantityLength y2 =
-                new QuantityMeasurementApp.QuantityLength(
-                        1.0,
-                        QuantityMeasurementApp.LengthUnit.YARDS);
-
-        System.out.println(
-                "Yard Same Value: "
-                        + y1.equals(y2)); // true
-
-        // Yard to yard different value
-        QuantityMeasurementApp.QuantityLength y3 =
-                new QuantityMeasurementApp.QuantityLength(
-                        2.0,
-                        QuantityMeasurementApp.LengthUnit.YARDS);
+        // Feet to inches
+        double result1 =
+                QuantityMeasurementApp
+                        .QuantityLength.convert(
+                                1.0,
+                                QuantityMeasurementApp
+                                        .LengthUnit.FEET,
+                                QuantityMeasurementApp
+                                        .LengthUnit.INCHES);
 
         System.out.println(
-                "Yard Different Value: "
-                        + y1.equals(y3)); // false
+                "Feet to Inches: "
+                        + (result1 == 12.0));
 
-        // Yard to feet
-        QuantityMeasurementApp.QuantityLength feet =
-                new QuantityMeasurementApp.QuantityLength(
-                        3.0,
-                        QuantityMeasurementApp.LengthUnit.FEET);
-
-        System.out.println(
-                "Yard to Feet: "
-                        + y1.equals(feet)); // true
-
-        // Feet to yard
-        System.out.println(
-                "Feet to Yard: "
-                        + feet.equals(y1)); // true
-
-        // Yard to inches
-        QuantityMeasurementApp.QuantityLength inches =
-                new QuantityMeasurementApp.QuantityLength(
-                        36.0,
-                        QuantityMeasurementApp.LengthUnit.INCHES);
+        // Inches to feet
+        double result2 =
+                QuantityMeasurementApp
+                        .QuantityLength.convert(
+                                24.0,
+                                QuantityMeasurementApp
+                                        .LengthUnit.INCHES,
+                                QuantityMeasurementApp
+                                        .LengthUnit.FEET);
 
         System.out.println(
-                "Yard to Inches: "
-                        + y1.equals(inches)); // true
+                "Inches to Feet: "
+                        + (result2 == 2.0));
 
-        // Inches to yard
+        // Yards to inches
+        double result3 =
+                QuantityMeasurementApp
+                        .QuantityLength.convert(
+                                1.0,
+                                QuantityMeasurementApp
+                                        .LengthUnit.YARDS,
+                                QuantityMeasurementApp
+                                        .LengthUnit.INCHES);
+
         System.out.println(
-                "Inches to Yard: "
-                        + inches.equals(y1)); // true
+                "Yards to Inches: "
+                        + (result3 == 36.0));
 
-        // Non-equivalent comparison
-        QuantityMeasurementApp.QuantityLength feet2 =
-                new QuantityMeasurementApp.QuantityLength(
-                        2.0,
-                        QuantityMeasurementApp.LengthUnit.FEET);
+        // Inches to yards
+        double result4 =
+                QuantityMeasurementApp
+                        .QuantityLength.convert(
+                                72.0,
+                                QuantityMeasurementApp
+                                        .LengthUnit.INCHES,
+                                QuantityMeasurementApp
+                                        .LengthUnit.YARDS);
 
         System.out.println(
-                "Yard to Feet Non Equivalent: "
-                        + y1.equals(feet2)); // false
+                "Inches to Yards: "
+                        + (result4 == 2.0));
 
-        // Centimeters to inches
-        QuantityMeasurementApp.QuantityLength cm1 =
-                new QuantityMeasurementApp.QuantityLength(
-                        1.0,
-                        QuantityMeasurementApp.LengthUnit.CENTIMETERS);
-
-        QuantityMeasurementApp.QuantityLength inch1 =
-                new QuantityMeasurementApp.QuantityLength(
-                        0.393701,
-                        QuantityMeasurementApp.LengthUnit.INCHES);
+        // CM to inches
+        double result5 =
+                QuantityMeasurementApp
+                        .QuantityLength.convert(
+                                2.54,
+                                QuantityMeasurementApp
+                                        .LengthUnit.CENTIMETERS,
+                                QuantityMeasurementApp
+                                        .LengthUnit.INCHES);
 
         System.out.println(
                 "CM to Inches: "
-                        + cm1.equals(inch1)); // true
+                        + (Math.abs(result5 - 1.0)
+                        < epsilon));
 
-        // Centimeters to feet non-equivalent
-        QuantityMeasurementApp.QuantityLength feet3 =
-                new QuantityMeasurementApp.QuantityLength(
-                        1.0,
-                        QuantityMeasurementApp.LengthUnit.FEET);
+        // Feet to yards
+        double result6 =
+                QuantityMeasurementApp
+                        .QuantityLength.convert(
+                                6.0,
+                                QuantityMeasurementApp
+                                        .LengthUnit.FEET,
+                                QuantityMeasurementApp
+                                        .LengthUnit.YARDS);
 
         System.out.println(
-                "CM to Feet Non Equivalent: "
-                        + cm1.equals(feet3)); // false
+                "Feet to Yards: "
+                        + (result6 == 2.0));
 
-        // Transitive property
+        // Round trip conversion
+        double value = 5.0;
+
+        double converted =
+                QuantityMeasurementApp
+                        .QuantityLength.convert(
+                                value,
+                                QuantityMeasurementApp
+                                        .LengthUnit.FEET,
+                                QuantityMeasurementApp
+                                        .LengthUnit.INCHES);
+
+        double back =
+                QuantityMeasurementApp
+                        .QuantityLength.convert(
+                                converted,
+                                QuantityMeasurementApp
+                                        .LengthUnit.INCHES,
+                                QuantityMeasurementApp
+                                        .LengthUnit.FEET);
+
         System.out.println(
-                "Transitive Property: "
-                        + (y1.equals(feet)
-                        && feet.equals(inches)
-                        && y1.equals(inches))); // true
+                "Round Trip: "
+                        + (Math.abs(back - value)
+                        < epsilon));
 
-        // Same reference
+        // Zero conversion
+        double zero =
+                QuantityMeasurementApp
+                        .QuantityLength.convert(
+                                0.0,
+                                QuantityMeasurementApp
+                                        .LengthUnit.FEET,
+                                QuantityMeasurementApp
+                                        .LengthUnit.INCHES);
+
         System.out.println(
-                "Same Reference: "
-                        + y1.equals(y1)); // true
+                "Zero Conversion: "
+                        + (zero == 0.0));
 
-        // Null comparison
+        // Negative conversion
+        double negative =
+                QuantityMeasurementApp
+                        .QuantityLength.convert(
+                                -1.0,
+                                QuantityMeasurementApp
+                                        .LengthUnit.FEET,
+                                QuantityMeasurementApp
+                                        .LengthUnit.INCHES);
+
         System.out.println(
-                "Null Comparison: "
-                        + y1.equals(null)); // false
+                "Negative Conversion: "
+                        + (negative == -12.0));
 
-        // Different type
+        // Same unit conversion
+        double same =
+                QuantityMeasurementApp
+                        .QuantityLength.convert(
+                                5.0,
+                                QuantityMeasurementApp
+                                        .LengthUnit.FEET,
+                                QuantityMeasurementApp
+                                        .LengthUnit.FEET);
+
         System.out.println(
-                "Different Type: "
-                        + y1.equals("1.0")); // false
+                "Same Unit Conversion: "
+                        + (same == 5.0));
 
-        // Null unit handling
+        // Null unit exception
         try {
 
-            QuantityMeasurementApp.QuantityLength invalid =
-                    new QuantityMeasurementApp.QuantityLength(
+            QuantityMeasurementApp
+                    .QuantityLength.convert(
                             1.0,
-                            null);
+                            null,
+                            QuantityMeasurementApp
+                                    .LengthUnit.FEET);
 
         } catch (IllegalArgumentException e) {
 
@@ -129,26 +174,40 @@ public class QuantityMeasurementAppTest {
                             + e.getMessage());
         }
 
-        // Complex scenario
-        QuantityMeasurementApp.QuantityLength yard2 =
-                new QuantityMeasurementApp.QuantityLength(
-                        2.0,
-                        QuantityMeasurementApp.LengthUnit.YARDS);
+        // NaN exception
+        try {
 
-        QuantityMeasurementApp.QuantityLength feet6 =
-                new QuantityMeasurementApp.QuantityLength(
-                        6.0,
-                        QuantityMeasurementApp.LengthUnit.FEET);
+            QuantityMeasurementApp
+                    .QuantityLength.convert(
+                            Double.NaN,
+                            QuantityMeasurementApp
+                                    .LengthUnit.FEET,
+                            QuantityMeasurementApp
+                                    .LengthUnit.INCHES);
 
-        QuantityMeasurementApp.QuantityLength inch72 =
-                new QuantityMeasurementApp.QuantityLength(
-                        72.0,
-                        QuantityMeasurementApp.LengthUnit.INCHES);
+        } catch (IllegalArgumentException e) {
 
-        System.out.println(
-                "Complex Scenario: "
-                        + (yard2.equals(feet6)
-                        && feet6.equals(inch72)
-                        && yard2.equals(inch72))); // true
+            System.out.println(
+                    "NaN Exception: "
+                            + e.getMessage());
+        }
+
+        // Infinity exception
+        try {
+
+            QuantityMeasurementApp
+                    .QuantityLength.convert(
+                            Double.POSITIVE_INFINITY,
+                            QuantityMeasurementApp
+                                    .LengthUnit.FEET,
+                            QuantityMeasurementApp
+                                    .LengthUnit.INCHES);
+
+        } catch (IllegalArgumentException e) {
+
+            System.out.println(
+                    "Infinity Exception: "
+                            + e.getMessage());
+        }
     }
 }

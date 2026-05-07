@@ -19,7 +19,7 @@ public class QuantityMeasurementApp {
         }
     }
 
-    // Generic QuantityLength class
+    // QuantityLength class
     static class QuantityLength {
 
         private final double value;
@@ -28,6 +28,11 @@ public class QuantityMeasurementApp {
         // Constructor
         public QuantityLength(double value,
                               LengthUnit unit) {
+
+            if (!Double.isFinite(value)) {
+                throw new IllegalArgumentException(
+                        "Value must be finite");
+            }
 
             if (unit == null) {
                 throw new IllegalArgumentException(
@@ -38,143 +43,195 @@ public class QuantityMeasurementApp {
             this.unit = unit;
         }
 
-        // Convert all values to feet
+        // Convert to base unit (feet)
         private double toFeet() {
-            return value * unit.getConversionFactor();
+            return value *
+                    unit.getConversionFactor();
         }
 
-        // Override equals()
+        // Convert current object to target unit
+        public QuantityLength convertTo(
+                LengthUnit targetUnit) {
+
+            if (targetUnit == null) {
+                throw new IllegalArgumentException(
+                        "Target unit cannot be null");
+            }
+
+            // Convert to feet
+            double feetValue = toFeet();
+
+            // Convert feet to target unit
+            double convertedValue =
+                    feetValue /
+                            targetUnit.getConversionFactor();
+
+            return new QuantityLength(
+                    convertedValue,
+                    targetUnit);
+        }
+
+        // Static conversion API
+        public static double convert(
+                double value,
+                LengthUnit sourceUnit,
+                LengthUnit targetUnit) {
+
+            if (!Double.isFinite(value)) {
+                throw new IllegalArgumentException(
+                        "Value must be finite");
+            }
+
+            if (sourceUnit == null
+                    || targetUnit == null) {
+
+                throw new IllegalArgumentException(
+                        "Units cannot be null");
+            }
+
+            // Convert source to feet
+            double feetValue =
+                    value *
+                            sourceUnit.getConversionFactor();
+
+            // Convert feet to target
+            return feetValue /
+                    targetUnit.getConversionFactor();
+        }
+
+        // Equals method
         @Override
         public boolean equals(Object obj) {
 
-            // Same reference
             if (this == obj) {
                 return true;
             }
 
-            // Null or different class
-            if (obj == null ||
-                    getClass() != obj.getClass()) {
+            if (obj == null
+                    || getClass() != obj.getClass()) {
+
                 return false;
             }
 
-            // Type casting
             QuantityLength other =
                     (QuantityLength) obj;
 
-            // Compare converted values
             return Double.compare(
                     this.toFeet(),
                     other.toFeet()) == 0;
         }
 
+        // toString method
         @Override
         public String toString() {
-            return "Quantity(" + value +
-                    ", " + unit + ")";
+
+            return "Quantity(" +
+                    value +
+                    ", " +
+                    unit +
+                    ")";
         }
+    }
+
+    // Method Overloading Example 1
+    public static void demonstrateLengthConversion(
+            double value,
+            LengthUnit fromUnit,
+            LengthUnit toUnit) {
+
+        double result =
+                QuantityLength.convert(
+                        value,
+                        fromUnit,
+                        toUnit);
+
+        System.out.println(
+                "Input: convert(" +
+                        value + ", " +
+                        fromUnit + ", " +
+                        toUnit + ")");
+
+        System.out.println(
+                "Output: " + result);
+
+        System.out.println();
+    }
+
+    // Method Overloading Example 2
+    public static void demonstrateLengthConversion(
+            QuantityLength quantity,
+            LengthUnit toUnit) {
+
+        QuantityLength converted =
+                quantity.convertTo(toUnit);
+
+        System.out.println(
+                "Input: " + quantity);
+
+        System.out.println(
+                "Converted To: " + converted);
+
+        System.out.println();
+    }
+
+    // Equality demonstration
+    public static void demonstrateLengthEquality(
+            QuantityLength q1,
+            QuantityLength q2) {
+
+        System.out.println(
+                q1 + " equals " + q2 +
+                        " -> " +
+                        q1.equals(q2));
     }
 
     // Main method
     public static void main(String[] args) {
 
-        // Yard to feet
-        QuantityLength q1 =
+        // Static conversion examples
+        demonstrateLengthConversion(
+                1.0,
+                LengthUnit.FEET,
+                LengthUnit.INCHES);
+
+        demonstrateLengthConversion(
+                3.0,
+                LengthUnit.YARDS,
+                LengthUnit.FEET);
+
+        demonstrateLengthConversion(
+                36.0,
+                LengthUnit.INCHES,
+                LengthUnit.YARDS);
+
+        demonstrateLengthConversion(
+                1.0,
+                LengthUnit.CENTIMETERS,
+                LengthUnit.INCHES);
+
+        demonstrateLengthConversion(
+                0.0,
+                LengthUnit.FEET,
+                LengthUnit.INCHES);
+
+        // Instance conversion example
+        QuantityLength yard =
                 new QuantityLength(
                         1.0,
                         LengthUnit.YARDS);
 
-        QuantityLength q2 =
+        demonstrateLengthConversion(
+                yard,
+                LengthUnit.INCHES);
+
+        // Equality example
+        QuantityLength feet =
                 new QuantityLength(
                         3.0,
                         LengthUnit.FEET);
 
-        // Yard to inches
-        QuantityLength q3 =
-                new QuantityLength(
-                        1.0,
-                        LengthUnit.YARDS);
-
-        QuantityLength q4 =
-                new QuantityLength(
-                        36.0,
-                        LengthUnit.INCHES);
-
-        // Yard to yard
-        QuantityLength q5 =
-                new QuantityLength(
-                        2.0,
-                        LengthUnit.YARDS);
-
-        QuantityLength q6 =
-                new QuantityLength(
-                        2.0,
-                        LengthUnit.YARDS);
-
-        // Cm to cm
-        QuantityLength q7 =
-                new QuantityLength(
-                        2.0,
-                        LengthUnit.CENTIMETERS);
-
-        QuantityLength q8 =
-                new QuantityLength(
-                        2.0,
-                        LengthUnit.CENTIMETERS);
-
-        // Cm to inches
-        QuantityLength q9 =
-                new QuantityLength(
-                        1.0,
-                        LengthUnit.CENTIMETERS);
-
-        QuantityLength q10 =
-                new QuantityLength(
-                        0.393701,
-                        LengthUnit.INCHES);
-
-        // Outputs
-        System.out.println(
-                "Input: " + q1 + " and " + q2);
-
-        System.out.println(
-                "Output: Equal (" +
-                        q1.equals(q2) + ")");
-
-        System.out.println();
-
-        System.out.println(
-                "Input: " + q3 + " and " + q4);
-
-        System.out.println(
-                "Output: Equal (" +
-                        q3.equals(q4) + ")");
-
-        System.out.println();
-
-        System.out.println(
-                "Input: " + q5 + " and " + q6);
-
-        System.out.println(
-                "Output: Equal (" +
-                        q5.equals(q6) + ")");
-
-        System.out.println();
-
-        System.out.println(
-                "Input: " + q7 + " and " + q8);
-
-        System.out.println(
-                "Output: Equal (" +
-                        q7.equals(q8) + ")");
-
-        System.out.println();
-
-        System.out.println(
-                "Input: " + q9 + " and " + q10);
-
-        System.out.println(
-                "Output: Equal (" +
-                        q9.equals(q10) + ")");
+        demonstrateLengthEquality(
+                yard,
+                feet);
     }
 }
