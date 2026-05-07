@@ -43,6 +43,14 @@ public class QuantityMeasurementApp {
             this.unit = unit;
         }
 
+        public double getValue() {
+            return value;
+        }
+
+        public LengthUnit getUnit() {
+            return unit;
+        }
+
         // Convert to base unit (feet)
         private double toFeet() {
             return value *
@@ -69,33 +77,7 @@ public class QuantityMeasurementApp {
                     targetUnit);
         }
 
-        // Static convert method
-        public static double convert(
-                double value,
-                LengthUnit sourceUnit,
-                LengthUnit targetUnit) {
-
-            if (!Double.isFinite(value)) {
-                throw new IllegalArgumentException(
-                        "Value must be finite");
-            }
-
-            if (sourceUnit == null
-                    || targetUnit == null) {
-
-                throw new IllegalArgumentException(
-                        "Units cannot be null");
-            }
-
-            double feetValue =
-                    value *
-                            sourceUnit.getConversionFactor();
-
-            return feetValue /
-                    targetUnit.getConversionFactor();
-        }
-
-        // Addition method
+        // UC6 Add method
         public QuantityLength add(
                 QuantityLength other) {
 
@@ -104,22 +86,12 @@ public class QuantityMeasurementApp {
                         "Second operand cannot be null");
             }
 
-            // Convert both to feet
-            double totalFeet =
-                    this.toFeet()
-                            + other.toFeet();
-
-            // Convert back to current object's unit
-            double result =
-                    totalFeet /
-                            this.unit.getConversionFactor();
-
-            return new QuantityLength(
-                    result,
+            return add(this,
+                    other,
                     this.unit);
         }
 
-        // Static add method
+        // UC7 Add method with explicit target unit
         public static QuantityLength add(
                 QuantityLength q1,
                 QuantityLength q2,
@@ -135,10 +107,12 @@ public class QuantityMeasurementApp {
                         "Target unit cannot be null");
             }
 
+            // Convert both to feet
             double totalFeet =
                     q1.toFeet()
                             + q2.toFeet();
 
+            // Convert result to target unit
             double result =
                     totalFeet /
                             targetUnit.getConversionFactor();
@@ -165,9 +139,10 @@ public class QuantityMeasurementApp {
             QuantityLength other =
                     (QuantityLength) obj;
 
-            return Double.compare(
-                    this.toFeet(),
-                    other.toFeet()) == 0;
+            return Math.abs(
+                    this.toFeet()
+                            - other.toFeet())
+                    < 1e-6;
         }
 
         // toString method
@@ -185,49 +160,62 @@ public class QuantityMeasurementApp {
     // Main method
     public static void main(String[] args) {
 
-        // Feet + Feet
-        QuantityLength q1 =
+        QuantityLength foot =
                 new QuantityLength(
                         1.0,
                         LengthUnit.FEET);
 
-        QuantityLength q2 =
-                new QuantityLength(
-                        2.0,
-                        LengthUnit.FEET);
-
-        System.out.println(
-                "Input: add(" + q1 + ", " + q2 + ")");
-
-        System.out.println(
-                "Output: " + q1.add(q2));
-
-        System.out.println();
-
-        // Feet + Inches
-        QuantityLength q3 =
+        QuantityLength inches =
                 new QuantityLength(
                         12.0,
                         LengthUnit.INCHES);
 
+        // FEET target
         System.out.println(
-                "Input: add(" + q1 + ", " + q3 + ")");
+                "Input: add(" + foot +
+                        ", " + inches +
+                        ", FEET)");
 
         System.out.println(
-                "Output: " + q1.add(q3));
+                "Output: "
+                        + QuantityLength.add(
+                        foot,
+                        inches,
+                        LengthUnit.FEET));
 
         System.out.println();
 
-        // Inches + Feet
+        // INCHES target
         System.out.println(
-                "Input: add(" + q3 + ", " + q1 + ")");
+                "Input: add(" + foot +
+                        ", " + inches +
+                        ", INCHES)");
 
         System.out.println(
-                "Output: " + q3.add(q1));
+                "Output: "
+                        + QuantityLength.add(
+                        foot,
+                        inches,
+                        LengthUnit.INCHES));
 
         System.out.println();
 
-        // Yards + Feet
+        // YARDS target
+        System.out.println(
+                "Input: add(" + foot +
+                        ", " + inches +
+                        ", YARDS)");
+
+        System.out.println(
+                "Output: "
+                        + QuantityLength.add(
+                        foot,
+                        inches,
+                        LengthUnit.YARDS));
+
+        System.out.println();
+
+        // YARDS + FEET
         QuantityLength yard =
                 new QuantityLength(
                         1.0,
@@ -239,33 +227,65 @@ public class QuantityMeasurementApp {
                         LengthUnit.FEET);
 
         System.out.println(
-                "Input: add(" + yard + ", " + feet + ")");
+                "Input: add(" + yard +
+                        ", " + feet +
+                        ", YARDS)");
 
         System.out.println(
-                "Output: " + yard.add(feet));
+                "Output: "
+                        + QuantityLength.add(
+                        yard,
+                        feet,
+                        LengthUnit.YARDS));
 
         System.out.println();
 
-        // CM + Inches
+        // INCHES + YARDS -> FEET
+        QuantityLength inch36 =
+                new QuantityLength(
+                        36.0,
+                        LengthUnit.INCHES);
+
+        System.out.println(
+                "Input: add(" + inch36 +
+                        ", " + yard +
+                        ", FEET)");
+
+        System.out.println(
+                "Output: "
+                        + QuantityLength.add(
+                        inch36,
+                        yard,
+                        LengthUnit.FEET));
+
+        System.out.println();
+
+        // CM + INCHES
         QuantityLength cm =
                 new QuantityLength(
                         2.54,
                         LengthUnit.CENTIMETERS);
 
-        QuantityLength inch =
+        QuantityLength inch1 =
                 new QuantityLength(
                         1.0,
                         LengthUnit.INCHES);
 
         System.out.println(
-                "Input: add(" + cm + ", " + inch + ")");
+                "Input: add(" + cm +
+                        ", " + inch1 +
+                        ", CENTIMETERS)");
 
         System.out.println(
-                "Output: " + cm.add(inch));
+                "Output: "
+                        + QuantityLength.add(
+                        cm,
+                        inch1,
+                        LengthUnit.CENTIMETERS));
 
         System.out.println();
 
-        // Zero value
+        // ZERO value
         QuantityLength zero =
                 new QuantityLength(
                         0.0,
@@ -278,14 +298,19 @@ public class QuantityMeasurementApp {
 
         System.out.println(
                 "Input: add(" + fiveFeet +
-                        ", " + zero + ")");
+                        ", " + zero +
+                        ", YARDS)");
 
         System.out.println(
-                "Output: " + fiveFeet.add(zero));
+                "Output: "
+                        + QuantityLength.add(
+                        fiveFeet,
+                        zero,
+                        LengthUnit.YARDS));
 
         System.out.println();
 
-        // Negative value
+        // NEGATIVE values
         QuantityLength negative =
                 new QuantityLength(
                         -2.0,
@@ -293,9 +318,14 @@ public class QuantityMeasurementApp {
 
         System.out.println(
                 "Input: add(" + fiveFeet +
-                        ", " + negative + ")");
+                        ", " + negative +
+                        ", INCHES)");
 
         System.out.println(
-                "Output: " + fiveFeet.add(negative));
+                "Output: "
+                        + QuantityLength.add(
+                        fiveFeet,
+                        negative,
+                        LengthUnit.INCHES));
     }
 }

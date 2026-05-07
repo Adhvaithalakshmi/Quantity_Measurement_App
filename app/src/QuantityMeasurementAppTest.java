@@ -4,55 +4,6 @@ public class QuantityMeasurementAppTest {
 
         double epsilon = 1e-6;
 
-        // Same unit feet + feet
-        QuantityMeasurementApp.QuantityLength f1 =
-                new QuantityMeasurementApp
-                        .QuantityLength(
-                        1.0,
-                        QuantityMeasurementApp
-                                .LengthUnit.FEET);
-
-        QuantityMeasurementApp.QuantityLength f2 =
-                new QuantityMeasurementApp
-                        .QuantityLength(
-                        2.0,
-                        QuantityMeasurementApp
-                                .LengthUnit.FEET);
-
-        System.out.println(
-                "Feet + Feet: "
-                        + f1.add(f2).equals(
-                        new QuantityMeasurementApp
-                                .QuantityLength(
-                                3.0,
-                                QuantityMeasurementApp
-                                        .LengthUnit.FEET)));
-
-        // Inches + Inches
-        QuantityMeasurementApp.QuantityLength i1 =
-                new QuantityMeasurementApp
-                        .QuantityLength(
-                        6.0,
-                        QuantityMeasurementApp
-                                .LengthUnit.INCHES);
-
-        QuantityMeasurementApp.QuantityLength i2 =
-                new QuantityMeasurementApp
-                        .QuantityLength(
-                        6.0,
-                        QuantityMeasurementApp
-                                .LengthUnit.INCHES);
-
-        System.out.println(
-                "Inches + Inches: "
-                        + i1.add(i2).equals(
-                        new QuantityMeasurementApp
-                                .QuantityLength(
-                                12.0,
-                                QuantityMeasurementApp
-                                        .LengthUnit.INCHES)));
-
-        // Feet + Inches
         QuantityMeasurementApp.QuantityLength foot =
                 new QuantityMeasurementApp
                         .QuantityLength(
@@ -67,30 +18,86 @@ public class QuantityMeasurementAppTest {
                         QuantityMeasurementApp
                                 .LengthUnit.INCHES);
 
+        // FEET target
+        QuantityMeasurementApp.QuantityLength result1 =
+                QuantityMeasurementApp
+                        .QuantityLength.add(
+                                foot,
+                                inches,
+                                QuantityMeasurementApp
+                                        .LengthUnit.FEET);
+
         System.out.println(
-                "Feet + Inches: "
-                        + foot.add(inches).equals(
+                "Feet Target: "
+                        + result1.equals(
                         new QuantityMeasurementApp
                                 .QuantityLength(
                                 2.0,
                                 QuantityMeasurementApp
                                         .LengthUnit.FEET)));
 
-        // Inches + Feet
+        // INCHES target
+        QuantityMeasurementApp.QuantityLength result2 =
+                QuantityMeasurementApp
+                        .QuantityLength.add(
+                                foot,
+                                inches,
+                                QuantityMeasurementApp
+                                        .LengthUnit.INCHES);
+
         System.out.println(
-                "Inches + Feet: "
-                        + inches.add(foot).equals(
+                "Inches Target: "
+                        + result2.equals(
                         new QuantityMeasurementApp
                                 .QuantityLength(
                                 24.0,
                                 QuantityMeasurementApp
                                         .LengthUnit.INCHES)));
 
-        // Yard + Feet
-        QuantityMeasurementApp.QuantityLength yard =
+        // YARDS target
+        QuantityMeasurementApp.QuantityLength result3 =
+                QuantityMeasurementApp
+                        .QuantityLength.add(
+                                foot,
+                                inches,
+                                QuantityMeasurementApp
+                                        .LengthUnit.YARDS);
+
+        System.out.println(
+                "Yards Target: "
+                        + (Math.abs(
+                        result3.getValue()
+                                - 0.6666667)
+                        < epsilon));
+
+        // CENTIMETERS target
+        QuantityMeasurementApp.QuantityLength inch1 =
                 new QuantityMeasurementApp
                         .QuantityLength(
                         1.0,
+                        QuantityMeasurementApp
+                                .LengthUnit.INCHES);
+
+        QuantityMeasurementApp.QuantityLength result4 =
+                QuantityMeasurementApp
+                        .QuantityLength.add(
+                                inch1,
+                                inch1,
+                                QuantityMeasurementApp
+                                        .LengthUnit.CENTIMETERS);
+
+        System.out.println(
+                "Centimeters Target: "
+                        + (Math.abs(
+                        result4.getValue()
+                                - 5.08)
+                        < 0.01));
+
+        // SAME AS FIRST OPERAND
+        QuantityMeasurementApp.QuantityLength yard =
+                new QuantityMeasurementApp
+                        .QuantityLength(
+                        2.0,
                         QuantityMeasurementApp
                                 .LengthUnit.YARDS);
 
@@ -101,69 +108,63 @@ public class QuantityMeasurementAppTest {
                         QuantityMeasurementApp
                                 .LengthUnit.FEET);
 
+        QuantityMeasurementApp.QuantityLength result5 =
+                QuantityMeasurementApp
+                        .QuantityLength.add(
+                                yard,
+                                feet,
+                                QuantityMeasurementApp
+                                        .LengthUnit.YARDS);
+
         System.out.println(
-                "Yard + Feet: "
-                        + yard.add(feet).equals(
+                "Same As First Operand: "
+                        + result5.equals(
                         new QuantityMeasurementApp
                                 .QuantityLength(
-                                2.0,
+                                3.0,
                                 QuantityMeasurementApp
                                         .LengthUnit.YARDS)));
 
-        // CM + Inch
-        QuantityMeasurementApp.QuantityLength cm =
-                new QuantityMeasurementApp
-                        .QuantityLength(
-                        2.54,
-                        QuantityMeasurementApp
-                                .LengthUnit.CENTIMETERS);
-
-        QuantityMeasurementApp.QuantityLength inch =
-                new QuantityMeasurementApp
-                        .QuantityLength(
-                        1.0,
-                        QuantityMeasurementApp
-                                .LengthUnit.INCHES);
-
-        QuantityMeasurementApp.QuantityLength result =
-                cm.add(inch);
-
-        System.out.println(
-                "CM + Inch: "
-                        + (Math.abs(
-                        result.convertTo(
-                                        QuantityMeasurementApp
-                                                .LengthUnit.CENTIMETERS)
-                                .convertTo(
-                                        QuantityMeasurementApp
-                                                .LengthUnit.CENTIMETERS)
-                                .add(
-                                        new QuantityMeasurementApp
-                                                .QuantityLength(
-                                                0.0,
-                                                QuantityMeasurementApp
-                                                        .LengthUnit.CENTIMETERS))
-                                .convertTo(
-                                        QuantityMeasurementApp
-                                                .LengthUnit.CENTIMETERS)
-                                .equals(result)
-                                ? 0 : 1) < epsilon));
-
-        // Commutativity
-        QuantityMeasurementApp.QuantityLength sum1 =
-                foot.add(inches);
-
-        QuantityMeasurementApp.QuantityLength sum2 =
-                inches.add(foot)
-                        .convertTo(
+        // SAME AS SECOND OPERAND
+        QuantityMeasurementApp.QuantityLength result6 =
+                QuantityMeasurementApp
+                        .QuantityLength.add(
+                                yard,
+                                feet,
                                 QuantityMeasurementApp
                                         .LengthUnit.FEET);
+
+        System.out.println(
+                "Same As Second Operand: "
+                        + result6.equals(
+                        new QuantityMeasurementApp
+                                .QuantityLength(
+                                9.0,
+                                QuantityMeasurementApp
+                                        .LengthUnit.FEET)));
+
+        // COMMUTATIVITY
+        QuantityMeasurementApp.QuantityLength sum1 =
+                QuantityMeasurementApp
+                        .QuantityLength.add(
+                                foot,
+                                inches,
+                                QuantityMeasurementApp
+                                        .LengthUnit.YARDS);
+
+        QuantityMeasurementApp.QuantityLength sum2 =
+                QuantityMeasurementApp
+                        .QuantityLength.add(
+                                inches,
+                                foot,
+                                QuantityMeasurementApp
+                                        .LengthUnit.YARDS);
 
         System.out.println(
                 "Commutativity: "
                         + sum1.equals(sum2));
 
-        // Adding zero
+        // ZERO VALUE
         QuantityMeasurementApp.QuantityLength zero =
                 new QuantityMeasurementApp
                         .QuantityLength(
@@ -178,16 +179,22 @@ public class QuantityMeasurementAppTest {
                         QuantityMeasurementApp
                                 .LengthUnit.FEET);
 
-        System.out.println(
-                "Identity Element: "
-                        + fiveFeet.add(zero).equals(
-                        new QuantityMeasurementApp
-                                .QuantityLength(
-                                5.0,
+        QuantityMeasurementApp.QuantityLength result7 =
+                QuantityMeasurementApp
+                        .QuantityLength.add(
+                                fiveFeet,
+                                zero,
                                 QuantityMeasurementApp
-                                        .LengthUnit.FEET)));
+                                        .LengthUnit.YARDS);
 
-        // Negative values
+        System.out.println(
+                "Zero Value: "
+                        + (Math.abs(
+                        result7.getValue()
+                                - 1.6666667)
+                        < epsilon));
+
+        // NEGATIVE VALUES
         QuantityMeasurementApp.QuantityLength negative =
                 new QuantityMeasurementApp
                         .QuantityLength(
@@ -195,80 +202,99 @@ public class QuantityMeasurementAppTest {
                         QuantityMeasurementApp
                                 .LengthUnit.FEET);
 
+        QuantityMeasurementApp.QuantityLength result8 =
+                QuantityMeasurementApp
+                        .QuantityLength.add(
+                                fiveFeet,
+                                negative,
+                                QuantityMeasurementApp
+                                        .LengthUnit.INCHES);
+
         System.out.println(
                 "Negative Values: "
-                        + fiveFeet.add(negative).equals(
+                        + result8.equals(
                         new QuantityMeasurementApp
                                 .QuantityLength(
-                                3.0,
+                                36.0,
                                 QuantityMeasurementApp
-                                        .LengthUnit.FEET)));
+                                        .LengthUnit.INCHES)));
 
-        // Null operand
+        // NULL TARGET UNIT
         try {
 
-            foot.add(null);
+            QuantityMeasurementApp
+                    .QuantityLength.add(
+                            foot,
+                            inches,
+                            null);
 
         } catch (IllegalArgumentException e) {
 
             System.out.println(
-                    "Null Operand Exception: "
+                    "Null Target Unit Exception: "
                             + e.getMessage());
         }
 
-        // Large values
+        // LARGE VALUES
         QuantityMeasurementApp.QuantityLength large1 =
                 new QuantityMeasurementApp
                         .QuantityLength(
-                        1e6,
+                        1000.0,
                         QuantityMeasurementApp
                                 .LengthUnit.FEET);
 
         QuantityMeasurementApp.QuantityLength large2 =
                 new QuantityMeasurementApp
                         .QuantityLength(
-                        1e6,
+                        500.0,
                         QuantityMeasurementApp
                                 .LengthUnit.FEET);
 
+        QuantityMeasurementApp.QuantityLength result9 =
+                QuantityMeasurementApp
+                        .QuantityLength.add(
+                                large1,
+                                large2,
+                                QuantityMeasurementApp
+                                        .LengthUnit.INCHES);
+
         System.out.println(
-                "Large Values: "
-                        + large1.add(large2).equals(
+                "Large To Small Scale: "
+                        + result9.equals(
                         new QuantityMeasurementApp
                                 .QuantityLength(
-                                2e6,
+                                18000.0,
                                 QuantityMeasurementApp
-                                        .LengthUnit.FEET)));
+                                        .LengthUnit.INCHES)));
 
-        // Small values
-        QuantityMeasurementApp.QuantityLength small1 =
+        // SMALL TO LARGE SCALE
+        QuantityMeasurementApp.QuantityLength inch12a =
                 new QuantityMeasurementApp
                         .QuantityLength(
-                        0.001,
+                        12.0,
                         QuantityMeasurementApp
-                                .LengthUnit.FEET);
+                                .LengthUnit.INCHES);
 
-        QuantityMeasurementApp.QuantityLength small2 =
+        QuantityMeasurementApp.QuantityLength inch12b =
                 new QuantityMeasurementApp
                         .QuantityLength(
-                        0.002,
+                        12.0,
                         QuantityMeasurementApp
-                                .LengthUnit.FEET);
+                                .LengthUnit.INCHES);
 
-        QuantityMeasurementApp.QuantityLength smallResult =
-                small1.add(small2);
+        QuantityMeasurementApp.QuantityLength result10 =
+                QuantityMeasurementApp
+                        .QuantityLength.add(
+                                inch12a,
+                                inch12b,
+                                QuantityMeasurementApp
+                                        .LengthUnit.YARDS);
 
         System.out.println(
-                "Small Values: "
+                "Small To Large Scale: "
                         + (Math.abs(
-                        QuantityMeasurementApp
-                                .QuantityLength.convert(
-                                        0.003,
-                                        QuantityMeasurementApp
-                                                .LengthUnit.FEET,
-                                        QuantityMeasurementApp
-                                                .LengthUnit.FEET)
-                                - 0.003)
+                        result10.getValue()
+                                - 0.6666667)
                         < epsilon));
     }
 }
