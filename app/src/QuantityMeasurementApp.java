@@ -1,72 +1,85 @@
-enum LengthUnit {
+// QuantityMeasurementApp.java
 
-    FEET(1.0),
-    INCHES(1.0 / 12.0);
+enum WeightUnit {
+    KILOGRAM(1.0),
+    GRAM(0.001),
+    POUND(0.453592);
 
-    private final double factor;
+    private final double conversionFactor;
 
-    LengthUnit(double factor) {
-        this.factor = factor;
+    WeightUnit(double conversionFactor) {
+        this.conversionFactor = conversionFactor;
     }
 
-    public double toFeet(double value) {
-        return value * factor;
+    public double convertToBaseUnit(double value) {
+        return value * conversionFactor;
     }
 
-    public double fromFeet(double value) {
-        return value / factor;
+    public double convertFromBaseUnit(double baseValue) {
+        return baseValue / conversionFactor;
     }
 }
 
-class QuantityLength {
+class QuantityWeight {
 
-    double value;
-    LengthUnit unit;
+    private final double value;
+    private final WeightUnit unit;
 
-    public QuantityLength(double value,
-                          LengthUnit unit) {
+    public QuantityWeight(double value, WeightUnit unit) {
+
+        if (unit == null) {
+            throw new IllegalArgumentException("Unit cannot be null");
+        }
+
+        if (!Double.isFinite(value)) {
+            throw new IllegalArgumentException("Invalid value");
+        }
 
         this.value = value;
         this.unit = unit;
     }
 
-    public QuantityLength add(QuantityLength other,
-                              LengthUnit targetUnit) {
+    public QuantityWeight convertTo(WeightUnit targetUnit) {
 
-        double first =
-                this.unit.toFeet(this.value);
+        double baseValue = unit.convertToBaseUnit(value);
+        double convertedValue = targetUnit.convertFromBaseUnit(baseValue);
 
-        double second =
-                other.unit.toFeet(other.value);
+        return new QuantityWeight(convertedValue, targetUnit);
+    }
 
-        double total = first + second;
+    public QuantityWeight add(QuantityWeight other) {
 
-        double result =
-                targetUnit.fromFeet(total);
+        double base1 = unit.convertToBaseUnit(this.value);
+        double base2 = other.unit.convertToBaseUnit(other.value);
 
-        return new QuantityLength(result,
-                targetUnit);
+        double sum = base1 + base2;
+
+        double result = unit.convertFromBaseUnit(sum);
+
+        return new QuantityWeight(result, unit);
     }
 
     @Override
     public boolean equals(Object obj) {
 
-        QuantityLength other =
-                (QuantityLength) obj;
+        if (this == obj) {
+            return true;
+        }
 
-        double first =
-                this.unit.toFeet(this.value);
+        if (!(obj instanceof QuantityWeight)) {
+            return false;
+        }
 
-        double second =
-                other.unit.toFeet(other.value);
+        QuantityWeight other = (QuantityWeight) obj;
 
-        return Math.abs(first - second)
-                < 0.0001;
+        double base1 = unit.convertToBaseUnit(this.value);
+        double base2 = other.unit.convertToBaseUnit(other.value);
+
+        return Math.abs(base1 - base2) < 0.0001;
     }
 
     @Override
     public String toString() {
-
         return value + " " + unit;
     }
 }
@@ -75,28 +88,26 @@ public class QuantityMeasurementApp {
 
     public static void main(String[] args) {
 
-        QuantityLength feet =
-                new QuantityLength(1.0,
-                        LengthUnit.FEET);
+        QuantityWeight w1 =
+                new QuantityWeight(1.0, WeightUnit.KILOGRAM);
 
-        QuantityLength inches =
-                new QuantityLength(12.0,
-                        LengthUnit.INCHES);
+        QuantityWeight w2 =
+                new QuantityWeight(1000.0, WeightUnit.GRAM);
 
-        // Equality
+        System.out.println("Equality Check:");
+        System.out.println(w1.equals(w2));
+
+        System.out.println();
+
+        System.out.println("Conversion:");
         System.out.println(
-                "Equality Result : "
-                        + feet.equals(inches)
+                new QuantityWeight(2.20462, WeightUnit.POUND)
+                        .convertTo(WeightUnit.KILOGRAM)
         );
 
-        // Addition
-        QuantityLength result =
-                feet.add(inches,
-                        LengthUnit.FEET);
+        System.out.println();
 
-        System.out.println(
-                "Addition Result : "
-                        + result
-        );
+        System.out.println("Addition:");
+        System.out.println(w1.add(w2));
     }
 }
