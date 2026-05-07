@@ -2,92 +2,119 @@ public class QuantityMeasurementAppTest {
 
     public static void main(String[] args) {
 
-        // Same feet value
-        QuantityMeasurementApp.QuantityLength feet1 =
+        // Yard to yard same value
+        QuantityMeasurementApp.QuantityLength y1 =
                 new QuantityMeasurementApp.QuantityLength(
                         1.0,
-                        QuantityMeasurementApp.LengthUnit.FEET);
+                        QuantityMeasurementApp.LengthUnit.YARDS);
 
-        QuantityMeasurementApp.QuantityLength feet2 =
+        QuantityMeasurementApp.QuantityLength y2 =
                 new QuantityMeasurementApp.QuantityLength(
                         1.0,
-                        QuantityMeasurementApp.LengthUnit.FEET);
+                        QuantityMeasurementApp.LengthUnit.YARDS);
 
         System.out.println(
-                "Feet to Feet Same Value: "
-                        + feet1.equals(feet2)); // true
+                "Yard Same Value: "
+                        + y1.equals(y2)); // true
 
-        // Same inch value
-        QuantityMeasurementApp.QuantityLength inch1 =
+        // Yard to yard different value
+        QuantityMeasurementApp.QuantityLength y3 =
                 new QuantityMeasurementApp.QuantityLength(
-                        1.0,
-                        QuantityMeasurementApp.LengthUnit.INCH);
-
-        QuantityMeasurementApp.QuantityLength inch2 =
-                new QuantityMeasurementApp.QuantityLength(
-                        1.0,
-                        QuantityMeasurementApp.LengthUnit.INCH);
+                        2.0,
+                        QuantityMeasurementApp.LengthUnit.YARDS);
 
         System.out.println(
-                "Inch to Inch Same Value: "
-                        + inch1.equals(inch2)); // true
+                "Yard Different Value: "
+                        + y1.equals(y3)); // false
 
-        // Feet to inch equivalent
+        // Yard to feet
         QuantityMeasurementApp.QuantityLength feet =
                 new QuantityMeasurementApp.QuantityLength(
+                        3.0,
+                        QuantityMeasurementApp.LengthUnit.FEET);
+
+        System.out.println(
+                "Yard to Feet: "
+                        + y1.equals(feet)); // true
+
+        // Feet to yard
+        System.out.println(
+                "Feet to Yard: "
+                        + feet.equals(y1)); // true
+
+        // Yard to inches
+        QuantityMeasurementApp.QuantityLength inches =
+                new QuantityMeasurementApp.QuantityLength(
+                        36.0,
+                        QuantityMeasurementApp.LengthUnit.INCHES);
+
+        System.out.println(
+                "Yard to Inches: "
+                        + y1.equals(inches)); // true
+
+        // Inches to yard
+        System.out.println(
+                "Inches to Yard: "
+                        + inches.equals(y1)); // true
+
+        // Non-equivalent comparison
+        QuantityMeasurementApp.QuantityLength feet2 =
+                new QuantityMeasurementApp.QuantityLength(
+                        2.0,
+                        QuantityMeasurementApp.LengthUnit.FEET);
+
+        System.out.println(
+                "Yard to Feet Non Equivalent: "
+                        + y1.equals(feet2)); // false
+
+        // Centimeters to inches
+        QuantityMeasurementApp.QuantityLength cm1 =
+                new QuantityMeasurementApp.QuantityLength(
+                        1.0,
+                        QuantityMeasurementApp.LengthUnit.CENTIMETERS);
+
+        QuantityMeasurementApp.QuantityLength inch1 =
+                new QuantityMeasurementApp.QuantityLength(
+                        0.393701,
+                        QuantityMeasurementApp.LengthUnit.INCHES);
+
+        System.out.println(
+                "CM to Inches: "
+                        + cm1.equals(inch1)); // true
+
+        // Centimeters to feet non-equivalent
+        QuantityMeasurementApp.QuantityLength feet3 =
+                new QuantityMeasurementApp.QuantityLength(
                         1.0,
                         QuantityMeasurementApp.LengthUnit.FEET);
 
-        QuantityMeasurementApp.QuantityLength inches =
-                new QuantityMeasurementApp.QuantityLength(
-                        12.0,
-                        QuantityMeasurementApp.LengthUnit.INCH);
-
         System.out.println(
-                "Feet to Inch Equivalent: "
-                        + feet.equals(inches)); // true
+                "CM to Feet Non Equivalent: "
+                        + cm1.equals(feet3)); // false
 
-        // Inch to feet equivalent
+        // Transitive property
         System.out.println(
-                "Inch to Feet Equivalent: "
-                        + inches.equals(feet)); // true
-
-        // Different feet values
-        QuantityMeasurementApp.QuantityLength feet3 =
-                new QuantityMeasurementApp.QuantityLength(
-                        2.0,
-                        QuantityMeasurementApp.LengthUnit.FEET);
-
-        System.out.println(
-                "Feet Different Value: "
-                        + feet1.equals(feet3)); // false
-
-        // Different inch values
-        QuantityMeasurementApp.QuantityLength inch3 =
-                new QuantityMeasurementApp.QuantityLength(
-                        2.0,
-                        QuantityMeasurementApp.LengthUnit.INCH);
-
-        System.out.println(
-                "Inch Different Value: "
-                        + inch1.equals(inch3)); // false
+                "Transitive Property: "
+                        + (y1.equals(feet)
+                        && feet.equals(inches)
+                        && y1.equals(inches))); // true
 
         // Same reference
         System.out.println(
                 "Same Reference: "
-                        + feet1.equals(feet1)); // true
+                        + y1.equals(y1)); // true
 
         // Null comparison
         System.out.println(
                 "Null Comparison: "
-                        + feet1.equals(null)); // false
+                        + y1.equals(null)); // false
 
         // Different type
         System.out.println(
                 "Different Type: "
-                        + feet1.equals("1.0")); // false
+                        + y1.equals("1.0")); // false
 
-        // Null unit test
+        // Null unit handling
         try {
 
             QuantityMeasurementApp.QuantityLength invalid =
@@ -101,5 +128,27 @@ public class QuantityMeasurementAppTest {
                     "Null Unit Exception: "
                             + e.getMessage());
         }
+
+        // Complex scenario
+        QuantityMeasurementApp.QuantityLength yard2 =
+                new QuantityMeasurementApp.QuantityLength(
+                        2.0,
+                        QuantityMeasurementApp.LengthUnit.YARDS);
+
+        QuantityMeasurementApp.QuantityLength feet6 =
+                new QuantityMeasurementApp.QuantityLength(
+                        6.0,
+                        QuantityMeasurementApp.LengthUnit.FEET);
+
+        QuantityMeasurementApp.QuantityLength inch72 =
+                new QuantityMeasurementApp.QuantityLength(
+                        72.0,
+                        QuantityMeasurementApp.LengthUnit.INCHES);
+
+        System.out.println(
+                "Complex Scenario: "
+                        + (yard2.equals(feet6)
+                        && feet6.equals(inch72)
+                        && yard2.equals(inch72))); // true
     }
 }
